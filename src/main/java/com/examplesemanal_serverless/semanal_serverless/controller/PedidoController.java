@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping(value = "api/pedido")
 public class PedidoController {
 
@@ -24,7 +24,7 @@ public class PedidoController {
     PedidoRepository pedidoRepository;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> findByIDPath(@PathVariable("id") final UUID id) {
+    public ResponseEntity<Pedido> findByIDPath(@PathVariable("id") final String id) {
         final Pedido pedido = this.pedidoRepository.findById(id).orElse(null);
         return ResponseEntity.ok(pedido);
     }
@@ -44,14 +44,18 @@ public class PedidoController {
         }
     }
 
-    public void deletePedido (final UUID id){
-        final Pedido dataPedido = this.pedidoRepository.findById(id).orElse(null);
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateStatus(@PathVariable String id, @RequestBody Pedido pedidoAtualizado) {
+        return pedidoService.updateStatus(id, pedidoAtualizado.getStatus());
+    }
 
-        if (dataPedido == null || !dataPedido.getId().equals(id)){
-            throw new RuntimeException();
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deletarPedido(@PathVariable("id") final String id) {
+        try {
+            this.pedidoService.deletarPedido(id);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
-        assert dataPedido != null;
-        this.pedidoRepository.delete(dataPedido);
     }
 }

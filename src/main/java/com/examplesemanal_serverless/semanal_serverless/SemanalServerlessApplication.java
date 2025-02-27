@@ -9,5 +9,4 @@ public class SemanalServerlessApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SemanalServerlessApplication.class, args);
 	}
-
 }

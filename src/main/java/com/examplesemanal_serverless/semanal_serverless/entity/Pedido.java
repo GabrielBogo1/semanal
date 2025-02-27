@@ -1,6 +1,7 @@
 package com.examplesemanal_serverless.semanal_serverless.entity;
 
 import com.examplesemanal_serverless.semanal_serverless.enums.Status;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,18 +16,68 @@ import java.util.UUID;
 @Getter @Setter
 @Table
 public class Pedido {
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Item> getItens() {
+        return itens;
+    }
+
+    public void setItens(List<Item> itens) {
+        this.itens = itens;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getData_criacao() {
+        return data_criacao;
+    }
+
+    public void setData_criacao(LocalDateTime data_criacao) {
+        this.data_criacao = data_criacao;
+    }
+
+    public LocalDateTime getData_atualizacao() {
+        return data_atualizacao;
+    }
+
+    public void setData_atualizacao(LocalDateTime data_atualizacao) {
+        this.data_atualizacao = data_atualizacao;
+    }
 
     @Id
-    @GeneratedValue(generator = "uuid-hibernate-generator")
-    @GenericGenerator(name = "uuid-hibernate-generator", strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, unique = true)
-    private UUID id;
+    private String id;
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -36,20 +87,25 @@ public class Pedido {
     @Column(name = "email", nullable = false)
     private String email;
 
+    public double getTotal() {
+        return total;
+    }
+
     @Column(name = "itens", nullable = false)
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List <Item> itens;
 
     @Column(name = "total", nullable = false)
-    private float total;
+    private double total;
 
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private Status status;
 
-    @Column(name = "data_criacao", nullable = false)
+    @Column(name = "data_criacao")
     private LocalDateTime data_criacao;
 
-    @Column(name = "data_atualizacao", nullable = false)
+    @Column(name = "data_atualizacao")
     private LocalDateTime data_atualizacao;
 
     @PrePersist
@@ -63,6 +119,12 @@ public class Pedido {
     private void preUpdate ()
     {
         this.data_atualizacao = LocalDateTime.now();
+    }
+
+    public void calcularTotal() {
+        this.total = itens.stream()
+                .mapToDouble(item -> item.getPreco() * item.getQuantidade())
+                .sum();
     }
 
 }
